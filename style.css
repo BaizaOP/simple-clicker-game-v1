@@ -11,5 +11,7 @@ body {
 }
 
 #upgrades button {
-  width: 10em;
+  width: 15em;
+  height: 2em;
+  margin: .2em 0;
 }
