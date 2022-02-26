@@ -6,22 +6,18 @@ const upgrades = document.querySelector('#upgrades'),
       INCS = [5, 20, 60, 120, 200];
 
 let counter = 0, // the amount of clicks displayed on the screen
-    inc = 1,     // how many clicks you get per click of the button
-    index = 0;
+    inc = 1;     // how many clicks you get per click of the button
 
 updateText();
+checkEnableState(findGreatestNumLessThan(COSTS, counter));
 
 upgrades.childNodes.forEach((el) => {
   if(el.nodeName == "BUTTON") {
-    el.disabled = true; 
     el.addEventListener('click', (e) => {
-      if(index == retIndex(el.id) && counter >= COSTS[index]) { 
-        counter -= COSTS[retIndex(el.id)];
-        inc = INCS[index]; // level up! 
-        index++;
-        el.disabled = true;
-        updateText();
-      }
+      counter -= COSTS[idToIndex(el.id)];
+      inc += INCS[idToIndex(el.id)];
+      checkEnableState(findGreatestNumLessThan(COSTS, counter));
+      updateText();
     });
   }
 });
@@ -30,20 +26,8 @@ click.addEventListener('click', (e) => {
   // everytime you click, increment the counter and update the text accordingly
   counter+=inc;
   updateText();
-  if(counter >= SHOW_THRESHOLD[index]) {
-    upgrades.childNodes.forEach((e) => {
-      if(e.nodeName == "BUTTON" && retIndex(e.id) == index) {
-        e.innerText = `${COSTS[index]} Clicks: ${INCS[index]} inc`;
-      }
-    });
-  }
-  if(counter >= COSTS[index]) {
-    upgrades.childNodes.forEach((e) => {
-      if(e.nodeName == "BUTTON" && retIndex(e.id) == index) {
-        e.disabled = false;
-      }
-    });
-  }
+  checkMessageState(findGreatestNumLessThan(SHOW_THRESHOLD, counter));
+  checkEnableState(findGreatestNumLessThan(COSTS, counter));
 });
 
 // abstracted this away, yeah
@@ -51,6 +35,37 @@ function updateText() {
   display.innerText = `Clicks: ${counter}\nInc: ${inc}`;
 }
 
-function retIndex(str) {
+function idToIndex(str) {
   return parseInt(str.slice(7));
+}
+
+function findGreatestNumLessThan(arr, num) {
+  for(var i = arr.length-1; i >= 0; i--) {
+    if(num >= arr[i]) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function checkEnableState(index) {
+  upgrades.childNodes.forEach((el) => {
+    if(el.nodeName == "BUTTON") {
+      if(idToIndex(el.id) > index) {
+        el.disabled = true;
+      } else {
+        el.disabled = false;
+      }
+    }
+  });
+}
+
+function checkMessageState(index) {
+  upgrades.childNodes.forEach((el) => {
+    if(el.nodeName == "BUTTON") {
+      if(idToIndex(el.id) <= index) {
+        el.innerText = `${COSTS[idToIndex(el.id)]} Clicks: +${INCS[idToIndex(el.id)]} inc`;
+      }
+    }
+  });
 }
